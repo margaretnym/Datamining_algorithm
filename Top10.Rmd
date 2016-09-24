@@ -1,0 +1,88 @@
+---
+title: "Top 10 data mining algorithms in plain R"
+output: html_document
+---
+
+
+Four Steps:
+
+1. You’ve divided this iris dataset into training and testing data.
+
+2. You’ve created a model after training C5.0 to predict the species using the training data.
+
+3. You’ve tested your model with the testing data.
+
+4. Finally, you’ve evaluated your model using a confusion matrix.
+
+
+This code loads the required packages:
+```{r}
+library(C50)
+library(printr)
+```
+
+This code takes a sample of 100 rows from the iris dataset:
+```{r}
+train.indeces <- sample(1:nrow(iris), 100)
+iris.train <- iris[train.indeces, ]
+iris.test <- iris[-train.indeces, ]
+```
+
+Takes a random 100 row sample from 1 through 150. That’s what sample() does. This sample is stored in train.indeces.
+
+Selects some rows (specifically the 100 you sampled) and all columns (leaving the part after the comma empty means you want all columns). This partial dataset is stored in iris.train.
+
+Remember, iris consists of rows and columns. Using the square brackets, you can select all rows, some rows, all columns or some columns.
+
+Selects some rows (specifically the rows not in the 100 you sampled) and all columns. This is stored in iris.test.
+
+This code trains a model based on the training data:
+```{r}
+model <- C5.0(Species ~ ., data = iris.train)
+```
+
+
+In this single line of R code you’re doing 3 things:
+
+You’re using the C5.0 function from the C50 package to create a model. Remember, a model is something that describes how observed data is generated.
+
+You’re telling C5.0 to use iris.train.
+
+Finally, you’re telling C5.0 that the Species column depends on the other columns (Sepal.Width, Petal.Height, etc.). The tilde means “depends” and the period means all the other columns. So, you’d say something like “Species depends on all the other column data.”
+
+Evaluating a predictive model can get really complicated. One of the simplest approaches is: cross-validation.
+
+What’s cross-validation? Cross-validation is usually done in multiple rounds. You’re just going to do one round of training on part of the dataset followed by testing on the remaining dataset.
+
+
+This code tests the model using the test data:
+```{r}
+results <- predict(object = model, newdata = iris.test, type = "class")
+```
+
+The predict() function takes your model, the test data and one parameter that tells it to guess the class (in this case, the model indicate species).
+
+Then it attempts to predict the species based on the other data columns and stores the results in results.
+
+
+A quick way to check the results is to use a confusion matrix.
+
+So… what’s a confusion matrix? Also known as a contingency table, a confusion matrix allows us to visually compare the predicted species vs. the actual species.
+
+This code generates a confusion matrix for the results:
+```{r}
+table(results, iris.test$Species)
+```
+
+The rows represent the predicted species, and the columns represent the actual species from the iris dataset.
+
+Starting from the setosa row, you would read this as:
+
+21 iris observations were predicted to be setosa when they were actually setosa.
+
+14 iris observations were predicted to be versicolor when they were actually versicolor.
+
+1 iris observation was predicted to be versicolor when it was actually virginica.
+
+14 iris observations were predicted to be virginica when it was actually virginica.
+
